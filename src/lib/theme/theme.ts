@@ -1,6 +1,16 @@
 import { createTheme } from "@mui/material";
 
 export const theme = createTheme({
+  breakpoints: {
+    values: {
+      xs: 600,
+      sm: 960,
+      md: 1280,
+      lg: 1536,
+      xl: 1920,
+    },
+  },
+
   palette: {
     primary: {
       main: "#FF6500",
@@ -32,6 +42,27 @@ export const theme = createTheme({
             fontSize: "12px",
             padding: "3px 8px 1px 8px",
             boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.1)",
+          },
+        },
+      },
+    },
+    MuiContainer: {
+      defaultProps: {
+        maxWidth: "lg",
+      },
+      styleOverrides: {
+        root: {
+          "@media (min-width:600px)": {
+            maxidth: "540px",
+          },
+          "@media (min-width:960px)": {
+            maxWidth: "860px",
+          },
+          "@media (min-width:1280px)": {
+            maxWidth: "1200px",
+          },
+          "@media (min-width:1920px)": {
+            maxWidth: "1600px",
           },
         },
       },
