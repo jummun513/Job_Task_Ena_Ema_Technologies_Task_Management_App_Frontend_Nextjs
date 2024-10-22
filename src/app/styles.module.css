@@ -1,23 +1,10 @@
 .page {
   text-align: center;
-  margin: 0 auto;
-  min-height: 100svh;
   padding: 60px 0;
-  background-color: aquamarine;
 }
 
 .heading {
   font-size: 36px;
-}
-
-.topSection {
-  display: flex;
-  justify-content: space-between;
-  padding: 32px 0;
-}
-
-.container {
-  background: #ff0000;
 }
 
 @media (max-width: 600px) {
