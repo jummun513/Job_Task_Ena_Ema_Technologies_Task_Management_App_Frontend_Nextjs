@@ -1,31 +1,49 @@
-import * as React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 import { styled } from "@mui/material/styles";
 import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import TagFacesIcon from "@mui/icons-material/TagFaces";
+import styles from "./styles.module.css";
+import { useState } from "react";
 
 interface ChipData {
   key: number;
   label: string;
 }
 
+const data = [{ key: 0, label: "Default" }];
+
 const ListItem = styled("li")(({ theme }) => ({
   margin: theme.spacing(0.5),
 }));
 
-const TagChip = () => {
-  const [chipData, setChipData] = React.useState<readonly ChipData[]>([
-    { key: 0, label: "Angular" },
-    { key: 1, label: "jQuery" },
-    { key: 2, label: "Polymer" },
-    { key: 3, label: "React" },
-    { key: 4, label: "Vue.js" },
-  ]);
+const TagChip = ({ onTagChange }: any) => {
+  const [chipData, setChipData] = useState<ChipData[]>(data);
+  const [inputValue, setInputValue] = useState<string>("");
+
   const handleDelete = (chipToDelete: ChipData) => () => {
     setChipData((chips) =>
       chips.filter((chip) => chip.key !== chipToDelete.key)
     );
   };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if ((e.key === "Enter" || e.keyCode === 32) && inputValue.trim() !== "") {
+      const updatedChips = [
+        ...chipData,
+        { key: chipData.length + 1, label: inputValue.trim() },
+      ];
+      setChipData(updatedChips);
+      setInputValue("");
+      onTagChange(updatedChips.map((chip) => chip.label));
+    }
+  };
+
   return (
     <Paper
       sx={{
@@ -38,23 +56,31 @@ const TagChip = () => {
       }}
       component="ul"
     >
-      {chipData.map((data) => {
+      {chipData.map((d) => {
         let icon;
-
-        if (data.label === "React") {
+        if (d.label === "Default") {
           icon = <TagFacesIcon />;
         }
 
         return (
-          <ListItem key={data.key}>
+          <ListItem key={d.key}>
             <Chip
               icon={icon}
-              label={data.label}
-              onDelete={data.label === "React" ? undefined : handleDelete(data)}
+              label={d.label}
+              onDelete={d.label === "Default" ? undefined : handleDelete(d)}
             />
           </ListItem>
         );
       })}
+      <input
+        type="text"
+        className={styles.textInput}
+        placeholder="Type then press enter or space"
+        required
+        value={inputValue}
+        onChange={handleInputChange}
+        onKeyUp={handleKeyUp}
+      />
     </Paper>
   );
 };

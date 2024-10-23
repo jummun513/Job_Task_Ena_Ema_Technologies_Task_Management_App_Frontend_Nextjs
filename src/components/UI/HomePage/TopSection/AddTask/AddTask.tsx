@@ -10,48 +10,70 @@ import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import TagChip from "./TagChip/TagChip";
 
 const AddTask = () => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [value, setValue] = useState<Dayjs | null>(dayjs("2022-04-17"));
-  const formRef = useRef<null>(null);
-  const [age, setAge] = useState<string>("");
+  const [date, setDate] = useState<Dayjs | null>(dayjs("2022-04-17"));
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const [priority, setPriority] = useState<string>("medium");
+  const [tags, setTags] = useState<string[]>(["Default"]);
+  const [data, setData] = useState({
+    name: "",
+    priority: priority,
+    dueDate: date?.toISOString(),
+    description: "",
+    tags: tags.map((tag) => ({ title: tag, isDeleted: false })),
+  });
 
-  const handleChange = (event: SelectChangeEvent) => {
-    setAge(event.target.value as string);
+  const handlePriorityChange = (event: SelectChangeEvent) => {
+    setPriority(event.target.value);
+    setData((prevData) => ({
+      ...prevData,
+      priority: event.target.value,
+    }));
   };
 
-  const handleInputChange = (field, e) => {
-    // let value;
-    // if (field === 'offerEnd') {
-    //     value = e;
-    // }
-    // else if (field === 'photo') {
-    //     value = e.target.files[0];
-    // }
-    // else {
-    //     value = e.target.value;
-    // }
-    // if (field === 'photo') {
-    //     setData((prevData) => ({
-    //         ...prevData,
-    //         [field]: [value],
-    //     }))
-    // }
-    // else {
-    //     setData((prevData) => ({
-    //         ...prevData,
-    //         [field]: value,
-    //     }))
-    // }
+  const handleDateChange = (newDate: Dayjs | null) => {
+    setDate(newDate);
+    setData((prevData) => ({
+      ...prevData,
+      dueDate: newDate?.toISOString(),
+    }));
   };
 
-  const handleSubmit = () => {
-    console.log("hello");
+  const handleTagChange = (newTags: string[]) => {
+    setTags(newTags);
+    setData((prevData) => ({
+      ...prevData,
+      tags: newTags.map((tag) => ({ title: tag, isDeleted: false })),
+    }));
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      console.log(data);
+      // const response = await fetch("/api/tasks", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify(data),
+      // });
+
+      // if (response.ok) {
+      //   console.log("Task added successfully");
+      //   setModalOpen(false);
+      // } else {
+      //   console.error("Failed to add task");
+      // }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   return (
     <div>
       <Button
@@ -79,49 +101,51 @@ const AddTask = () => {
         <AddCircleIcon />
       </IconButton>
       <ReusableModal
+        handleSubmit={handleSubmit}
         setOpen={setModalOpen}
         open={modalOpen}
         title="Add a Task"
         sx={{ width: "100%", maxWidth: "600px", margin: "0 auto" }}
       >
-        <form ref={formRef} onSubmit={handleSubmit} className={styles.form}>
+        <form ref={formRef} className={styles.form}>
           <div>
             <label className={styles.inputLabel}>
-              Task Title<sup className={styles.inputRequired}>*</sup>
+              Task Name<sup className={styles.inputRequired}>*</sup>
             </label>
             <input
-              onChange={(e) => handleInputChange("target", e)}
               type="text"
               className={styles.textInput}
               placeholder="Examination Preparation"
               required
+              onChange={(e) => setData({ ...data, name: e.target.value })}
             />
           </div>
           <div className={styles.inputContainer}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["DatePicker", "DatePicker"]}>
                 <DatePicker
-                  label="Due Date"
-                  value={value}
-                  onChange={(newValue) => setValue(newValue)}
+                  label="Due Date *"
+                  value={date}
+                  onChange={handleDateChange}
                   sx={{ width: "100%" }}
                 />
               </DemoContainer>
             </LocalizationProvider>
           </div>
           <div className={styles.inputContainer}>
-            <InputLabel id="demo-simple-select-label">Age</InputLabel>
+            <label id="demo-simple-select-label" className={styles.inputLabel}>
+              Priority<sup className={styles.inputRequired}>*</sup>
+            </label>
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={age}
-              label="Age"
-              onChange={handleChange}
+              value={priority}
+              onChange={handlePriorityChange}
               fullWidth={true}
             >
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
+              <MenuItem value="low">Low</MenuItem>
+              <MenuItem value="medium">Medium</MenuItem>
+              <MenuItem value="high">High</MenuItem>
             </Select>
           </div>
 
@@ -129,18 +153,20 @@ const AddTask = () => {
             <label className={styles.inputLabel}>
               Tags<sup className={styles.inputRequired}>*</sup>
             </label>
-            <TagChip />
+            <TagChip onTagChange={handleTagChange} />
           </div>
           <div className={styles.inputContainer}>
             <label className={styles.inputLabel}>
               Description<sup className={styles.inputRequired}>*</sup>
             </label>
             <textarea
-              onChange={(e) => handleInputChange("desc", e)}
               style={{ resize: "none" }}
               className={styles.inputTextArea}
               placeholder="Write Here..."
               required
+              onChange={(e) =>
+                setData({ ...data, description: e.target.value })
+              }
             ></textarea>
           </div>
         </form>

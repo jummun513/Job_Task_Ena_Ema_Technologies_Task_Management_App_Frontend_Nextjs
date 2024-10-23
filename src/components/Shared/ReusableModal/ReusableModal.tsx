@@ -19,6 +19,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 type TReusableModalProps = {
+  handleSubmit: (e: React.FormEvent) => Promise<void>;
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   title: string;
@@ -27,6 +28,7 @@ type TReusableModalProps = {
 };
 
 export default function ReusableModal({
+  handleSubmit,
   open,
   setOpen,
   title,
@@ -64,7 +66,7 @@ export default function ReusableModal({
         </IconButton>
         <DialogContent dividers>{children}</DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={handleClose}>
+          <Button autoFocus onClick={handleSubmit}>
             Save changes
           </Button>
         </DialogActions>
