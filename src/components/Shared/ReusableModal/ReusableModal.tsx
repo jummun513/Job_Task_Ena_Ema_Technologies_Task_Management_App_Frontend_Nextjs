@@ -23,7 +23,9 @@ type TReusableModalProps = {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   title: string;
+  isLoading: boolean;
   children: React.ReactNode;
+  buttonText: string;
   sx?: SxProps;
 };
 
@@ -33,6 +35,8 @@ export default function ReusableModal({
   setOpen,
   title,
   children,
+  isLoading,
+  buttonText,
   sx,
 }: TReusableModalProps) {
   const handleClose = () => {
@@ -66,8 +70,8 @@ export default function ReusableModal({
         </IconButton>
         <DialogContent dividers>{children}</DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={handleSubmit}>
-            Save changes
+          <Button disabled={isLoading} autoFocus onClick={handleSubmit}>
+            {isLoading ? "Loading..." : buttonText}
           </Button>
         </DialogActions>
       </BootstrapDialog>

@@ -2,7 +2,7 @@
 import { Button, IconButton } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import ReusableModal from "@/components/Shared/ReusableModal/ReusableModal";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./styles.module.css";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
@@ -12,6 +12,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import TagChip from "./TagChip/TagChip";
+import { useAddTaskMutation } from "@/redux/task/taskApi";
+import { toast } from "react-toastify";
 
 const AddTask = () => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -26,6 +28,10 @@ const AddTask = () => {
     description: "",
     tags: tags.map((tag) => ({ title: tag, isDeleted: false })),
   });
+  const [addData, { isSuccess, isLoading, isError, error }] =
+    useAddTaskMutation();
+  const notifySuccess = () => toast.success("Successfully added task!");
+  const notifyError = () => toast.error("Something wrong!");
 
   const handlePriorityChange = (event: SelectChangeEvent) => {
     setPriority(event.target.value);
@@ -54,25 +60,22 @@ const AddTask = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      console.log(data);
-      // const response = await fetch("/api/tasks", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify(data),
-      // });
-
-      // if (response.ok) {
-      //   console.log("Task added successfully");
-      //   setModalOpen(false);
-      // } else {
-      //   console.error("Failed to add task");
-      // }
+      await addData(data);
     } catch (error) {
       console.error("Error:", error);
     }
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      notifySuccess();
+      formRef?.current?.reset();
+      setModalOpen(false);
+    } else if (isError) {
+      console.error(error);
+      notifyError();
+    }
+  }, [isSuccess, isError, error]);
 
   return (
     <div>
@@ -104,8 +107,10 @@ const AddTask = () => {
         handleSubmit={handleSubmit}
         setOpen={setModalOpen}
         open={modalOpen}
+        isLoading={isLoading}
         title="Add a Task"
         sx={{ width: "100%", maxWidth: "600px", margin: "0 auto" }}
+        buttonText="Add Task"
       >
         <form ref={formRef} className={styles.form}>
           <div>

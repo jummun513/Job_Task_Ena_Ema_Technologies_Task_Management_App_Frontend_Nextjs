@@ -1,25 +1,46 @@
-import { Button, Paper } from "@mui/material";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Paper } from "@mui/material";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import styles from "./styles.module.css";
 import AddTask from "./AddTask/AddTask";
+import FilterTask from "./FilterTask/FilterTask";
+import { useState } from "react";
 
-const TopSection = () => {
+type TTopSection = {
+  setQuery: (query: Record<string, any>) => void;
+};
+
+const TopSection = ({ setQuery }: TTopSection) => {
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
   return (
     <div className={styles.topSection}>
       <AddTask />
       <Paper
-        component={"form"}
-        elevation={1}
         sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          width: "55%",
+          height: "35px",
+          "@media (max-width:600px)": {
+            height: "30px",
+            width: "60%",
+          },
         }}
       >
         <InputBase
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyUp={(e) => {
+            if (e.key === "Enter") {
+              setQuery((prev: Record<string, any>) => ({
+                ...prev,
+                searchTerm: searchTerm,
+              }));
+            }
+          }}
           sx={{
             ml: 1,
             flex: 3,
@@ -29,15 +50,19 @@ const TopSection = () => {
             width: "100%",
             "@media (max-width:600px)": {
               ml: 0,
-              width: "40%",
               fontSize: "10px",
               padding: "1px 8px",
             },
           }}
           placeholder="Search Task"
-          inputProps={{ "aria-label": "search" }}
         />
         <IconButton
+          onClick={() => {
+            setQuery((prev: Record<string, any>) => ({
+              ...prev,
+              searchTerm: searchTerm,
+            }));
+          }}
           type="button"
           sx={{
             p: "10px",
@@ -45,33 +70,11 @@ const TopSection = () => {
               p: "6px",
             },
           }}
-          aria-label="search"
         >
           <SearchIcon />
         </IconButton>
       </Paper>
-      <Button
-        sx={{
-          "@media (max-width:600px)": {
-            display: "none",
-          },
-        }}
-        startIcon={<FilterListIcon />}
-      >
-        Filter
-      </Button>
-      <IconButton
-        type="button"
-        sx={{
-          p: "10px",
-          color: "primary.main",
-          "@media (min-width:600px)": {
-            display: "none",
-          },
-        }}
-      >
-        <FilterListIcon />
-      </IconButton>
+      <FilterTask />
     </div>
   );
 };
