@@ -7,12 +7,9 @@ import styles from "./styles.module.css";
 import AddTask from "./AddTask/AddTask";
 import FilterTask from "./FilterTask/FilterTask";
 import { useState } from "react";
+import { TSearchQuery } from "@/types";
 
-type TTopSection = {
-  setQuery: (query: Record<string, any>) => void;
-};
-
-const TopSection = ({ setQuery }: TTopSection) => {
+const TopSection = ({ setQuery }: TSearchQuery) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   return (
@@ -74,7 +71,7 @@ const TopSection = ({ setQuery }: TTopSection) => {
           <SearchIcon />
         </IconButton>
       </Paper>
-      <FilterTask />
+      <FilterTask setQuery={setQuery} />
     </div>
   );
 };

@@ -17,7 +17,7 @@ import { toast } from "react-toastify";
 
 const AddTask = () => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [date, setDate] = useState<Dayjs | null>(dayjs("2022-04-17"));
+  const [date, setDate] = useState<Dayjs | null>(dayjs(Date.now()));
   const formRef = useRef<HTMLFormElement | null>(null);
   const [priority, setPriority] = useState<string>("medium");
   const [tags, setTags] = useState<string[]>(["Default"]);
@@ -32,6 +32,7 @@ const AddTask = () => {
     useAddTaskMutation();
   const notifySuccess = () => toast.success("Successfully added task!");
   const notifyError = () => toast.error("Something wrong!");
+  const [controlledError, setControlledError] = useState("");
 
   const handlePriorityChange = (event: SelectChangeEvent) => {
     setPriority(event.target.value);
@@ -42,6 +43,7 @@ const AddTask = () => {
   };
 
   const handleDateChange = (newDate: Dayjs | null) => {
+    setControlledError("");
     setDate(newDate);
     setData((prevData) => ({
       ...prevData,
@@ -50,6 +52,7 @@ const AddTask = () => {
   };
 
   const handleTagChange = (newTags: string[]) => {
+    setControlledError("");
     setTags(newTags);
     setData((prevData) => ({
       ...prevData,
@@ -59,6 +62,16 @@ const AddTask = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (data?.name.length < 1) {
+      return setControlledError("nameError");
+    } else if (Date.now() > Date.parse(`${data?.dueDate}`)) {
+      return setControlledError("dateError");
+    } else if (data?.tags.length < 2) {
+      return setControlledError("tagError");
+    } else if (data?.description.length < 1) {
+      return setControlledError("descriptionError");
+    }
+
     try {
       await addData(data);
     } catch (error) {
@@ -124,11 +137,16 @@ const AddTask = () => {
               required
               onChange={(e) => setData({ ...data, name: e.target.value })}
             />
+            <p style={{ fontSize: "12px", marginTop: "5px", color: "red" }}>
+              {controlledError == "nameError" && "Name is required!"}
+            </p>
           </div>
           <div className={styles.inputContainer}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["DatePicker", "DatePicker"]}>
                 <DatePicker
+                  minDate={dayjs(Date.now())}
+                  format="DD/MM/YYYY"
                   label="Due Date *"
                   value={date}
                   onChange={handleDateChange}
@@ -136,6 +154,9 @@ const AddTask = () => {
                 />
               </DemoContainer>
             </LocalizationProvider>
+            <p style={{ fontSize: "12px", marginTop: "5px", color: "red" }}>
+              {controlledError == "dateError" && "Date must be future date!"}
+            </p>
           </div>
           <div className={styles.inputContainer}>
             <label id="demo-simple-select-label" className={styles.inputLabel}>
@@ -159,6 +180,9 @@ const AddTask = () => {
               Tags<sup className={styles.inputRequired}>*</sup>
             </label>
             <TagChip onTagChange={handleTagChange} />
+            <p style={{ fontSize: "12px", marginTop: "5px", color: "red" }}>
+              {controlledError == "tagError" && "At least a tag must be added!"}
+            </p>
           </div>
           <div className={styles.inputContainer}>
             <label className={styles.inputLabel}>
@@ -173,6 +197,10 @@ const AddTask = () => {
                 setData({ ...data, description: e.target.value })
               }
             ></textarea>
+            <p style={{ fontSize: "12px", marginTop: "5px", color: "red" }}>
+              {controlledError == "descriptionError" &&
+                "Description is required!"}
+            </p>
           </div>
         </form>
       </ReusableModal>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import ReusableModal from "@/components/Shared/ReusableModal/ReusableModal";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -6,6 +7,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import styles from "./styles.module.css";
 import ReusableSelect from "@/components/Shared/ReusableSelect/ReusableSelect";
 import SelectChip from "./SelectChip/SelectChip";
+import { TSearchQuery } from "@/types";
 
 const statusList = [
   { label: "Completed", value: "completed" },
@@ -18,20 +20,7 @@ const priorityList = [
   { label: "High", value: "high" },
 ];
 
-const storeTags = [
-  "Oliver Hansen",
-  "Van Henry",
-  "April Tucker",
-  "Ralph Hubbard",
-  "Omar Alexander",
-  "Carlos Abbott",
-  "Miriam Wagner",
-  "Bradley Wilkerson",
-  "Virginia Andrews",
-  "Kelly Snyder",
-];
-
-const FilterTask = () => {
+const FilterTask = ({ setQuery }: TSearchQuery) => {
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const isLoading = false;
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -41,7 +30,7 @@ const FilterTask = () => {
   const [data, setData] = useState({
     priority: priority,
     status: status,
-    tags: tags,
+    tags: tags?.join(","),
   });
   const handlePriorityChange = (event: SelectChangeEvent) => {
     setPriority(event.target.value);
@@ -69,13 +58,17 @@ const FilterTask = () => {
   useEffect(() => {
     setData((prevData) => ({
       ...prevData,
-      tags: tags,
+      tags: tags.join(","),
     }));
   }, [tags]);
 
   const handleSubmit = async (e: FormEvent<Element>) => {
     e.preventDefault();
-    console.log(data);
+    setQuery((prev: Record<string, any>) => ({
+      ...prev,
+      ...data,
+    }));
+    setOpenFilterModal(false);
   };
 
   return (
@@ -134,11 +127,7 @@ const FilterTask = () => {
           </div>
 
           <div className={styles.inputContainer}>
-            <SelectChip
-              tags={tags}
-              handleTagsChange={handleTagsChange}
-              storeTags={storeTags}
-            />
+            <SelectChip tags={tags} handleTagsChange={handleTagsChange} />
           </div>
         </form>
       </ReusableModal>

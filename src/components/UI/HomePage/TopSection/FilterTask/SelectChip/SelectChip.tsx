@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useGetAllCategoriesQuery } from "@/redux/categories/categoriesApi";
 import {
   Box,
   Chip,
@@ -23,11 +25,12 @@ const MenuProps = {
 
 type TSelectChip = {
   tags: string[];
-  storeTags: string[];
   handleTagsChange: (event: SelectChangeEvent<string[]>) => void;
 };
 
-const SelectChip = ({ tags, handleTagsChange, storeTags }: TSelectChip) => {
+const SelectChip = ({ tags, handleTagsChange }: TSelectChip) => {
+  const { data, isLoading } = useGetAllCategoriesQuery("");
+
   return (
     <>
       <FormControl fullWidth>
@@ -48,11 +51,17 @@ const SelectChip = ({ tags, handleTagsChange, storeTags }: TSelectChip) => {
           )}
           MenuProps={MenuProps}
         >
-          {storeTags.map((name) => (
-            <MenuItem key={name} value={name}>
-              {name}
-            </MenuItem>
-          ))}
+          {isLoading ? (
+            <p>Loading...</p>
+          ) : data?.data?.length < 1 ? (
+            <p>Nothing</p>
+          ) : (
+            data?.data?.map((d: any, i: number) => (
+              <MenuItem key={i} value={d.title}>
+                {d.title}
+              </MenuItem>
+            ))
+          )}
         </Select>
       </FormControl>
     </>
